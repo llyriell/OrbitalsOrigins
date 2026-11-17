@@ -1,0 +1,215 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  background: #05070d;
+  overflow: hidden;
+  font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---- slow rotation driven by JS CSS variable ---- */
+.orbit-rotate-layer {
+  transform: rotate(var(--orbit-angle, 0deg));
+  transform-origin: 50% 50%;
+  transition: transform 0.05s linear;
+}
+
+/* ---- gentle floating drift for constellation nodes ---- */
+.orbit-drift-0 { animation: orbit-float-a 14s ease-in-out infinite; }
+.orbit-drift-1 { animation: orbit-float-b 18s ease-in-out infinite; }
+.orbit-drift-2 { animation: orbit-float-a 22s ease-in-out infinite reverse; }
+.orbit-drift-3 { animation: orbit-float-b 16s ease-in-out infinite reverse; }
+
+@keyframes orbit-float-a {
+  0%, 100% { transform: translate(-50%, -50%) translate(0, 0); }
+  33% { transform: translate(-50%, -50%) translate(6px, -5px); }
+  66% { transform: translate(-50%, -50%) translate(-5px, 4px); }
+}
+@keyframes orbit-float-b {
+  0%, 100% { transform: translate(-50%, -50%) translate(0, 0); }
+  50% { transform: translate(-50%, -50%) translate(-7px, -6px); }
+}
+
+/* ---- ambient starfield ---- */
+.orbit-starfield {
+  background-image:
+    radial-gradient(1px 1px at 12% 22%, rgba(200,220,255,0.5), transparent),
+    radial-gradient(1px 1px at 78% 18%, rgba(200,220,255,0.35), transparent),
+    radial-gradient(1px 1px at 42% 78%, rgba(200,220,255,0.4), transparent),
+    radial-gradient(1px 1px at 88% 62%, rgba(200,220,255,0.3), transparent),
+    radial-gradient(1px 1px at 22% 88%, rgba(200,220,255,0.35), transparent),
+    radial-gradient(1px 1px at 62% 42%, rgba(200,220,255,0.25), transparent),
+    radial-gradient(1px 1px at 8% 52%, rgba(200,220,255,0.3), transparent),
+    radial-gradient(1px 1px at 92% 88%, rgba(200,220,255,0.2), transparent),
+    radial-gradient(1px 1px at 52% 12%, rgba(200,220,255,0.3), transparent),
+    radial-gradient(1px 1px at 32% 58%, rgba(200,220,255,0.2), transparent);
+  background-size: 100% 100%;
+  opacity: 0.7;
+  animation: orbit-twinkle 9s ease-in-out infinite;
+}
+@keyframes orbit-twinkle {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 0.8; }
+}
+
+/* ---- harmonograph symbol ---- */
+.harmonograph {
+  display: block;
+  flex: none;
+  transition: width 0.8s cubic-bezier(0.22,1,0.36,1), height 0.8s cubic-bezier(0.22,1,0.36,1), opacity 0.7s ease;
+  filter: drop-shadow(0 0 6px rgba(120,180,240,0.25));
+}
+.harmonograph-active {
+  filter: drop-shadow(0 0 14px rgba(120,180,240,0.45));
+}
+.harmonograph-active .harmonograph-ring-a {
+  animation: orbit-ring-spin 18s linear infinite;
+  transform-origin: 32px 32px;
+}
+.harmonograph-active .harmonograph-ring-b {
+  animation: orbit-ring-spin 26s linear infinite reverse;
+  transform-origin: 32px 32px;
+}
+@keyframes orbit-ring-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ---- pulse rings expand outward when active, becoming the aura ---- */
+.harmonograph-pulse-ring {
+  transform-origin: 32px 32px;
+  opacity: 0;
+}
+.harmonograph-active .harmonograph-pulse-1 {
+  animation: orbit-pulse-expand 4s ease-out infinite;
+}
+.harmonograph-active .harmonograph-pulse-2 {
+  animation: orbit-pulse-expand 4s ease-out infinite 1.3s;
+}
+.harmonograph-active .harmonograph-pulse-3 {
+  animation: orbit-pulse-expand 4s ease-out infinite 2.6s;
+}
+@keyframes orbit-pulse-expand {
+  0% { transform: scale(1); opacity: 0.55; }
+  100% { transform: scale(2.6); opacity: 0; }
+}
+
+/* ---- bloom center button ---- */
+.orbit-bloom-center {
+  width: 64px;
+  height: 64px;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+}
+.orbit-bloom-hit-area,
+.orbit-node-hit-area {
+  cursor: pointer;
+}
+
+/* ---- hover water ripple ---- */
+.orbit-bloom-center::after,
+.orbit-node::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 20px;
+  height: 20px;
+  border: 1px solid rgba(164,211,248,0.45);
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(0.4);
+  opacity: 0;
+  pointer-events: none;
+}
+.orbit-bloom-center:hover::after,
+.orbit-node:hover::after {
+  animation: orbit-water-ripple 2.2s ease-out infinite;
+}
+@keyframes orbit-water-ripple {
+  0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0.5; }
+  100% { transform: translate(-50%, -50%) scale(4.5); opacity: 0; }
+}
+
+/* ---- orbit node (petal/leaf button) ---- */
+.orbit-node {
+  cursor: pointer;
+  animation: orbit-petal-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes orbit-petal-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.orbit-node:hover .harmonograph {
+  filter: drop-shadow(0 0 12px rgba(150,200,240,0.5));
+  transform: scale(1.16);
+}
+.orbit-node .harmonograph {
+  transition: transform 0.4s cubic-bezier(0.22,1,0.36,1), filter 0.4s ease;
+}
+
+/* ---- branch connecting line ---- */
+.orbit-branch-wrap {
+  transform-origin: 100% 0;
+}
+.orbit-branch-inner {
+  transform-origin: 100% 0;
+}
+.orbit-branch-open .orbit-branch-inner {
+  animation: orbit-branch-shoot 0.75s cubic-bezier(0.22,1,0.36,1) both;
+}
+@keyframes orbit-branch-shoot {
+  from { transform: scaleX(0); opacity: 0; }
+  55% { opacity: 1; }
+  to { transform: scaleX(1); opacity: 1; }
+}
+
+/* ---- spark at petal center when branch arrives ---- */
+.petal-lit::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(226,244,255,0.85);
+  box-shadow: 0 0 12px 4px rgba(150,200,240,0.45);
+  transform: translate(-50%, -50%) scale(0);
+  pointer-events: none;
+  animation: orbit-spark 0.8s cubic-bezier(0.22,1,0.36,1) 0.5s both;
+}
+@keyframes orbit-spark {
+  0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+  38% { transform: translate(-50%, -50%) scale(2.4); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(0.7); opacity: 0; }
+}
+
+/* ---- breathing glow on center bloom ---- */
+.orbit-bloom-center .harmonograph {
+  animation: orbit-breathe 7s ease-in-out infinite;
+}
+@keyframes orbit-breathe {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
+
+/* ---- labels stay upright by counter-rotating against the field ---- */
+.orbit-upright {
+  transform: translate(-50%, 0) rotate(calc(-1 * var(--orbit-angle, 0deg)));
+  transform-origin: 50% 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .orbit-drift-0, .orbit-drift-1, .orbit-drift-2, .orbit-drift-3,
+  .orbit-starfield, .orbit-bloom-center .harmonograph,
+  .harmonograph-active .harmonograph-ring-a, .harmonograph-active .harmonograph-ring-b,
+  .harmonograph-active .harmonograph-pulse-1, .harmonograph-active .harmonograph-pulse-2,
+  .harmonograph-active .harmonograph-pulse-3,
+  .orbit-branch-open .orbit-branch-inner, .petal-lit::after {
+    animation: none !important;
+  }
+}
